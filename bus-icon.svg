@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
+  <rect width="180" height="180" rx="40" fill="#ff6b9d"/>
+  <circle cx="90" cy="95" r="45" fill="#fff0f5"/>
+  <circle cx="90" cy="95" r="35" fill="#ffecd2"/>
+  <circle cx="75" cy="85" r="8" fill="#ff6b6b"/>
+  <circle cx="105" cy="85" r="8" fill="#ffa502"/>
+  <circle cx="90" cy="75" r="7" fill="#2ed573"/>
+  <circle cx="80" cy="100" r="6" fill="#a55eea"/>
+  <circle cx="100" cy="100" r="6" fill="#fd79a8"/>
+  <rect x="65" y="130" width="50" height="12" rx="4" fill="#5c3a4d"/>
+  <text x="90" y="158" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="white">NR332</text>
+</svg>
