@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Next Bus - Ma Wan ↔ Kwai Fong</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #000;
+            --card-bg: #1c1c1e;
+            --text: #fff;
+            --text-secondary: #8e8e93;
+            --accent: #0a84ff;
+            --success: #30d158;
+            --warning: #ff9f0a;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 60px 16px 20px;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 60px 16px 16px;
+            background: linear-gradient(180deg, var(--bg) 0%, transparent 100%);
+            z-index: 100;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px 16px;
+            background: var(--card-bg);
+            border: none;
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            background: var(--accent);
+        }
+
+        .route-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .route-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .route-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .route-direction {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .eta-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .eta-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+        }
+
+        .eta-time {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .eta-time.now {
+            color: var(--success);
+        }
+
+        .eta-time.soon {
+            color: var(--warning);
+        }
+
+        .eta-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .no-buses {
+            text-align: center;
+            padding: 24px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .last-updated {
+            text-align: center;
+            padding: 16px;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .schedule-note {
+            text-align: center;
+            padding: 12px;
+            background: rgba(10, 132, 255, 0.1);
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 12px;
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Next Bus</h1>
+        <p class="subtitle">Ma Wan ↔ Kwai Fong (NR332)</p>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active" onclick="setDirection('toKwaiFong')">→ Kwai Fong</button>
+        <button class="tab" onclick="setDirection('toMaWan')">→ Ma Wan</button>
+    </div>
+
+    <div class="schedule-note">
+        📅 Fixed schedule - times updated every minute
+    </div>
+
+    <div id="content"></div>
+
+    <div class="last-updated" id="lastUpdated"></div>
+
+    <script>
+        // Park Island NR332 Schedule
+        // EDIT THESE TIMES TO MATCH THE ACTUAL SCHEDULE
+        // Format: [hours, minutes] in 24-hour format
+        
+        const SCHEDULE = {
+            toKwaiFong: [
+                // Ma Wan -> Kwai Fong (morning - departing Ma Wan)
+                [6, 20], [6, 40],
+                [7, 0], [7, 20], [7, 40],
+                [8, 0], [8, 20], [8, 40],
+                [9, 0], [9, 30], [10, 0],
+                [10, 30], [11, 0], [11, 30],
+                [12, 0], [12, 30], [13, 0], [13, 30],
+                [14, 0], [14, 30], [15, 0], [15, 30],
+                [16, 0], [16, 20], [16, 40],
+                [17, 0], [17, 20], [17, 40],
+                [18, 0], [18, 20], [18, 40],
+                [19, 0], [19, 30], [20, 0],
+                [20, 30], [21, 0], [21, 30],
+                [22, 0], [22, 30], [23, 0], [23, 30]
+            ],
+            toMaWan: [
+                // Kwai Fong -> Ma Wan (morning - departing Kwai Fong)
+                [6, 30], [6, 50],
+                [7, 10], [7, 30], [7, 50],
+                [8, 10], [8, 30], [8, 50],
+                [9, 10], [9, 40], [10, 10],
+                [10, 40], [11, 10], [11, 40],
+                [12, 10], [12, 40], [13, 10], [13, 40],
+                [14, 10], [14, 40], [15, 10], [15, 40],
+                [16, 10], [16, 30], [16, 50],
+                [17, 10], [17, 30], [17, 50],
+                [18, 10], [18, 30], [18, 50],
+                [19, 10], [19, 40], [20, 10],
+                [20, 40], [21, 10], [21, 40],
+                [22, 10], [22, 40], [23, 10], [23, 40]
+            ]
+        };
+
+        let currentDirection = 'toKwaiFong';
+
+        function setDirection(dir) {
+            currentDirection = dir;
+            document.querySelectorAll('.tab').forEach((tab, i) => {
+                tab.classList.toggle('active', 
+                    (dir === 'toKwaiFong' && i === 0) || 
+                    (dir === 'toMaWan' && i === 1)
+                );
+            });
+            renderSchedule();
+        }
+
+        function getMinutesUntilBus(schedule) {
+            const now = new Date();
+            const currentHours = now.getHours();
+            const currentMinutes = now.getMinutes();
+            const currentTotalMins = currentHours * 60 + currentMinutes;
+
+            for (let i = 0; i < schedule.length; i++) {
+                const [h, m] = schedule[i];
+                const busTotalMins = h * 60 + m;
+                
+                if (busTotalMins > currentTotalMins) {
+                    return {
+                        index: i,
+                        minsUntil: busTotalMins - currentTotalMins,
+                        time: schedule[i]
+                    };
+                }
+            }
+            
+            // All buses gone for today - return first bus tomorrow
+            const [h, m] = schedule[0];
+            const firstBusTomorrowMins = (24 * 60) - currentTotalMins + (h * 60 + m);
+            return {
+                index: 0,
+                minsUntil: firstBusTomorrowMins,
+                time: schedule[0],
+                tomorrow: true
+            };
+        }
+
+        function renderSchedule() {
+            const content = document.getElementById('content');
+            const schedule = SCHEDULE[currentDirection];
+            
+            // Get next 3 buses
+            const nextBuses = [];
+            for (let i = 0; i < schedule.length; i++) {
+                const [h, m] = schedule[i];
+                const now = new Date();
+                const currentMins = now.getHours() * 60 + now.getMinutes();
+                const busMins = h * 60 + m;
+                
+                if (busMins > currentMins) {
+                    nextBuses.push({ time: schedule[i], minsUntil: busMins - currentMins });
+                    if (nextBuses.length >= 3) break;
+                }
+            }
+
+            // If no more buses today, show first bus tomorrow
+            if (nextBuses.length === 0) {
+                const [h, m] = schedule[0];
+                const now = new Date();
+                const currentMins = now.getHours() * 60 + now.getMinutes();
+                const minsUntil = (24 * 60) - currentMins + (h * 60 + m);
+                nextBuses.push({ time: schedule[0], minsUntil, tomorrow: true });
+            }
+
+            const directionLabel = currentDirection === 'toKwaiFong' 
+                ? 'Ma Wan → Kwai Fong' 
+                : 'Kwai Fong → Ma Wan';
+
+            const etaHtml = nextBuses.map(bus => {
+                let timeClass = '';
+                if (bus.minsUntil <= 5) timeClass = 'now';
+                else if (bus.minsUntil <= 15) timeClass = 'soon';
+
+                const timeStr = bus.tomorrow 
+                    ? `Tomorrow ${bus.time[0]}:${String(bus.time[1]).padStart(2, '0')}`
+                    : `${bus.minsUntil} min`;
+
+                return `
+                    <div class="eta-item">
+                        <div>
+                            <div class="eta-time ${timeClass}">${timeStr}</div>
+                            <div class="eta-label">${bus.time[0]}:${String(bus.time[1]).padStart(2, '0')}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            content.innerHTML = `
+                <div class="route-card">
+                    <div class="route-header">
+                        <div>
+                            <div class="route-number">NR332</div>
+                            <div class="route-direction">${directionLabel}</div>
+                        </div>
+                    </div>
+                    <div class="eta-list">
+                        ${etaHtml}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('lastUpdated').textContent = 
+                `Updated ${new Date().toLocaleTimeString()}`;
+        }
+
+        // Refresh every 60 seconds
+        renderSchedule();
+        setInterval(renderSchedule, 60000);
+    </script>
+</body>
+</html>
