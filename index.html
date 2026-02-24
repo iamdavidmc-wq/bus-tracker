@@ -100,6 +100,16 @@
             font-size: 13px;
         }
 
+        .day-type {
+            text-align: center;
+            padding: 8px;
+            background: rgba(10, 132, 255, 0.15);
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: var(--accent);
+        }
+
         .eta-list {
             display: flex;
             flex-direction: column;
@@ -133,12 +143,6 @@
             color: var(--text-secondary);
         }
 
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: var(--text-secondary);
-        }
-
         .no-buses {
             text-align: center;
             padding: 24px;
@@ -152,22 +156,12 @@
             color: var(--text-secondary);
             font-size: 12px;
         }
-
-        .schedule-note {
-            text-align: center;
-            padding: 12px;
-            background: rgba(10, 132, 255, 0.1);
-            border-radius: 8px;
-            margin-bottom: 16px;
-            font-size: 12px;
-            color: var(--accent);
-        }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>Next Bus</h1>
-        <p class="subtitle">Ma Wan ↔ Kwai Fong (NR332)</p>
+        <p class="subtitle">NR332 Ma Wan ↔ Kwai Fong</p>
     </div>
 
     <div class="tabs">
@@ -175,55 +169,130 @@
         <button class="tab" onclick="setDirection('toMaWan')">→ Ma Wan</button>
     </div>
 
-    <div class="schedule-note">
-        📅 Fixed schedule - times updated every minute
-    </div>
+    <div class="day-type" id="dayType"></div>
 
     <div id="content"></div>
 
     <div class="last-updated" id="lastUpdated"></div>
 
     <script>
-        // Park Island NR332 Schedule
-        // EDIT THESE TIMES TO MATCH THE ACTUAL SCHEDULE
-        // Format: [hours, minutes] in 24-hour format
-        
         const SCHEDULE = {
-            toKwaiFong: [
-                // Ma Wan -> Kwai Fong (morning - departing Ma Wan)
-                [6, 20], [6, 40],
-                [7, 0], [7, 20], [7, 40],
-                [8, 0], [8, 20], [8, 40],
-                [9, 0], [9, 30], [10, 0],
-                [10, 30], [11, 0], [11, 30],
-                [12, 0], [12, 30], [13, 0], [13, 30],
-                [14, 0], [14, 30], [15, 0], [15, 30],
-                [16, 0], [16, 20], [16, 40],
-                [17, 0], [17, 20], [17, 40],
-                [18, 0], [18, 20], [18, 40],
-                [19, 0], [19, 30], [20, 0],
-                [20, 30], [21, 0], [21, 30],
-                [22, 0], [22, 30], [23, 0], [23, 30]
-            ],
-            toMaWan: [
-                // Kwai Fong -> Ma Wan (morning - departing Kwai Fong)
-                [6, 30], [6, 50],
-                [7, 10], [7, 30], [7, 50],
-                [8, 10], [8, 30], [8, 50],
-                [9, 10], [9, 40], [10, 10],
-                [10, 40], [11, 10], [11, 40],
-                [12, 10], [12, 40], [13, 10], [13, 40],
-                [14, 10], [14, 40], [15, 10], [15, 40],
-                [16, 10], [16, 30], [16, 50],
-                [17, 10], [17, 30], [17, 50],
-                [18, 10], [18, 30], [18, 50],
-                [19, 10], [19, 40], [20, 10],
-                [20, 40], [21, 10], [21, 40],
-                [22, 10], [22, 40], [23, 10], [23, 40]
-            ]
+            weekday: {
+                toKwaiFong: [
+                    [6,0],[6,15],[6,30],[6,40],[6,50],
+                    [7,0],[7,10],[7,20],[7,30],[7,38],[7,46],[7,54],
+                    [8,2],[8,10],[8,18],[8,26],[8,34],[8,42],[8,50],
+                    [9,0],[9,10],[9,20],[9,30],[9,40],[9,50],
+                    [10,0],[10,12],[10,24],[10,36],[10,48],
+                    [11,0],[11,12],[11,24],[11,36],[11,48],
+                    [12,0],[12,12],[12,24],[12,36],[12,48],
+                    [13,0],[13,12],[13,24],[13,36],[13,48],
+                    [14,0],[14,12],[14,24],[14,36],[14,48],
+                    [15,0],[15,12],[15,24],[15,36],[15,48],
+                    [16,0],[16,12],[16,24],[16,36],[16,48],
+                    [17,0],[17,10],[17,20],[17,30],[17,40],[17,50],
+                    [18,0],[18,10],[18,20],[18,30],[18,40],[18,50],
+                    [19,0],[19,12],[19,24],[19,36],[19,48],
+                    [20,0],[20,12],[20,24],[20,36],[20,48],
+                    [21,0],[21,12],[21,24],[21,36],[21,48],
+                    [22,0],[22,12],[22,24],[22,36],[22,48],
+                    [23,0],[23,15],[23,30],[23,45],
+                    [0,0],[0,15],[0,45],
+                    [1,0],[1,45],
+                    [2,30],
+                    [3,15],
+                    [4,0],[4,45],
+                    [5,30]
+                ],
+                toMaWan: [
+                    [6,20],[6,35],[6,45],[6,55],
+                    [7,5],[7,15],[7,25],[7,35],[7,45],[7,55],
+                    [8,5],[8,15],[8,25],[8,35],[8,45],[8,55],
+                    [9,5],[9,15],[9,25],[9,35],[9,45],
+                    [10,0],[10,12],[10,24],[10,36],[10,48],
+                    [11,0],[11,12],[11,24],[11,36],[11,48],
+                    [12,0],[12,12],[12,24],[12,36],[12,48],
+                    [13,0],[13,12],[13,24],[13,36],[13,48],
+                    [14,0],[14,12],[14,24],[14,36],[14,48],
+                    [15,0],[15,12],[15,24],[15,36],[15,48],
+                    [16,0],[16,12],[16,24],[16,36],[16,48],
+                    [17,0],[17,10],[17,20],[17,30],[17,40],[17,50],[17,58],
+                    [18,6],[18,14],[18,22],[18,30],[18,38],[18,46],[18,54],
+                    [19,2],[19,10],[19,18],[19,26],[19,34],[19,42],[19,50],[19,58],
+                    [20,6],[20,14],[20,22],[20,30],[20,38],[20,46],[20,54],
+                    [21,2],[21,10],[21,18],[21,26],[21,34],[21,42],[21,50],[21,58],
+                    [22,6],[22,14],[22,22],[22,30],[22,38],[22,46],[22,54],
+                    [23,2],[23,15],[23,30],[23,45],
+                    [0,0],[0,30],
+                    [1,0],[1,25],
+                    [2,10],[2,55],
+                    [3,40],
+                    [4,25],
+                    [5,10],[5,55]
+                ]
+            },
+            weekend: {
+                toKwaiFong: [
+                    [6,0],[6,15],[6,30],[6,40],[6,50],
+                    [7,0],[7,10],[7,20],[7,30],[7,40],[7,50],
+                    [8,0],[8,10],[8,20],[8,30],[8,40],[8,50],
+                    [9,0],[9,10],[9,20],[9,30],[9,45],
+                    [10,0],[10,12],[10,24],[10,36],[10,48],
+                    [11,0],[11,12],[11,24],[11,36],[11,48],
+                    [12,0],[12,12],[12,24],[12,36],[12,48],
+                    [13,0],[13,12],[13,24],[13,36],[13,48],
+                    [14,0],[14,12],[14,24],[14,36],[14,48],
+                    [15,0],[15,12],[15,24],[15,36],[15,48],
+                    [16,0],[16,12],[16,24],[16,36],[16,48],
+                    [17,0],[17,10],[17,20],[17,30],[17,40],[17,50],
+                    [18,0],[18,10],[18,20],[18,30],[18,40],[18,50],
+                    [19,0],[19,12],[19,24],[19,36],[19,48],
+                    [20,0],[20,12],[20,24],[20,36],[20,48],
+                    [21,0],[21,12],[21,24],[21,36],[21,48],
+                    [22,0],[22,12],[22,24],[22,36],[22,48],
+                    [23,0],[23,15],[23,30],[23,45],
+                    [0,0],[0,15],[0,45],
+                    [1,0],[1,45],
+                    [2,30],
+                    [3,15],
+                    [4,0],[4,45],
+                    [5,30]
+                ],
+                toMaWan: [
+                    [6,20],[6,35],[6,45],[6,55],
+                    [7,5],[7,15],[7,25],[7,35],[7,45],[7,55],
+                    [8,5],[8,15],[8,25],[8,35],[8,45],[8,55],
+                    [9,5],[9,15],[9,25],[9,35],[9,45],
+                    [10,0],[10,12],[10,24],[10,36],[10,48],
+                    [11,0],[11,12],[11,24],[11,36],[11,48],
+                    [12,0],[12,12],[12,24],[12,36],[12,48],
+                    [13,0],[13,12],[13,24],[13,36],[13,48],
+                    [14,0],[14,12],[14,24],[14,36],[14,48],
+                    [15,0],[15,12],[15,24],[15,36],[15,48],
+                    [16,0],[16,12],[16,24],[16,36],[16,48],
+                    [17,0],[17,10],[17,20],[17,30],[17,40],[17,50],
+                    [18,0],[18,10],[18,20],[18,30],[18,38],[18,46],[18,54],
+                    [19,2],[19,10],[19,18],[19,26],[19,34],[19,42],[19,50],[19,58],
+                    [20,6],[20,14],[20,22],[20,30],[20,38],[20,46],[20,54],
+                    [21,2],[21,10],[21,18],[21,26],[21,34],[21,42],[21,50],[21,58],
+                    [22,6],[22,14],[22,22],[22,30],[22,38],[22,46],[22,54],
+                    [23,2],[23,15],[23,30],[23,45],
+                    [0,0],[0,30],
+                    [1,0],[1,25],
+                    [2,10],[2,55],
+                    [3,40],
+                    [4,25],
+                    [5,10],[5,55]
+                ]
+            }
         };
 
         let currentDirection = 'toKwaiFong';
+
+        function isWeekend() {
+            const day = new Date().getDay();
+            return day === 0 || day === 6;
+        }
 
         function setDirection(dir) {
             currentDirection = dir;
@@ -236,46 +305,13 @@
             renderSchedule();
         }
 
-        function getMinutesUntilBus(schedule) {
+        function getNextBuses(schedule) {
             const now = new Date();
-            const currentHours = now.getHours();
-            const currentMinutes = now.getMinutes();
-            const currentTotalMins = currentHours * 60 + currentMinutes;
-
-            for (let i = 0; i < schedule.length; i++) {
-                const [h, m] = schedule[i];
-                const busTotalMins = h * 60 + m;
-                
-                if (busTotalMins > currentTotalMins) {
-                    return {
-                        index: i,
-                        minsUntil: busTotalMins - currentTotalMins,
-                        time: schedule[i]
-                    };
-                }
-            }
-            
-            // All buses gone for today - return first bus tomorrow
-            const [h, m] = schedule[0];
-            const firstBusTomorrowMins = (24 * 60) - currentTotalMins + (h * 60 + m);
-            return {
-                index: 0,
-                minsUntil: firstBusTomorrowMins,
-                time: schedule[0],
-                tomorrow: true
-            };
-        }
-
-        function renderSchedule() {
-            const content = document.getElementById('content');
-            const schedule = SCHEDULE[currentDirection];
-            
-            // Get next 3 buses
+            const currentMins = now.getHours() * 60 + now.getMinutes();
             const nextBuses = [];
+
             for (let i = 0; i < schedule.length; i++) {
                 const [h, m] = schedule[i];
-                const now = new Date();
-                const currentMins = now.getHours() * 60 + now.getMinutes();
                 const busMins = h * 60 + m;
                 
                 if (busMins > currentMins) {
@@ -284,15 +320,23 @@
                 }
             }
 
-            // If no more buses today, show first bus tomorrow
             if (nextBuses.length === 0) {
                 const [h, m] = schedule[0];
-                const now = new Date();
-                const currentMins = now.getHours() * 60 + now.getMinutes();
-                const minsUntil = (24 * 60) - currentMins + (h * 60 + m);
-                nextBuses.push({ time: schedule[0], minsUntil, tomorrow: true });
+                nextBuses.push({ time: schedule[0], minsUntil: (24 * 60) - currentMins + (h * 60 + m), tomorrow: true });
             }
 
+            return nextBuses;
+        }
+
+        function renderSchedule() {
+            const dayType = isWeekend() ? 'weekend' : 'weekday';
+            const schedule = SCHEDULE[dayType][currentDirection];
+            const nextBuses = getNextBuses(schedule);
+            
+            document.getElementById('dayType').textContent = 
+                dayType === 'weekend' ? '📅 Saturday / Sunday / Public Holiday' : '📅 Monday - Friday';
+
+            const content = document.getElementById('content');
             const directionLabel = currentDirection === 'toKwaiFong' 
                 ? 'Ma Wan → Kwai Fong' 
                 : 'Kwai Fong → Ma Wan';
@@ -304,7 +348,9 @@
 
                 const timeStr = bus.tomorrow 
                     ? `Tomorrow ${bus.time[0]}:${String(bus.time[1]).padStart(2, '0')}`
-                    : `${bus.minsUntil} min`;
+                    : bus.minsUntil === 0 
+                        ? 'Now'
+                        : `${bus.minsUntil} min`;
 
                 return `
                     <div class="eta-item">
@@ -334,7 +380,6 @@
                 `Updated ${new Date().toLocaleTimeString()}`;
         }
 
-        // Refresh every 60 seconds
         renderSchedule();
         setInterval(renderSchedule, 60000);
     </script>
