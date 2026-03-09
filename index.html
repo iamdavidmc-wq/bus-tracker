@@ -897,9 +897,6 @@
             const dayType = isWeekend() ? 'weekend' : 'weekday';
             const nextBuses = getNextBuses(schedule[destination][dayType][direction], destination, direction);
             
-            document.getElementById(containerId + 'DayType').textContent = 
-                dayType === 'weekend' ? '📅 Saturday / Sunday / Public Holiday' : '📅 Monday - Friday';
-
             const etaHtml = nextBuses.map(bus => {
                 let timeClass = '';
                 if (bus.noService) {
@@ -948,6 +945,13 @@
 
         function renderSchedule() {
             const dest = currentDestination;
+            const dayType = isWeekend() ? 'weekend' : 'weekday';
+            
+            document.getElementById('dayTypeLeft').textContent = 
+                dayType === 'weekend' ? '📅 Saturday / Sunday / Public Holiday' : '📅 Monday - Friday';
+            document.getElementById('dayTypeRight').textContent = 
+                dayType === 'weekend' ? '📅 Saturday / Sunday / Public Holiday' : '📅 Monday - Friday';
+            
             renderColumn('contentLeft', SCHEDULE, dest, 'fromMaWan', DESTINATIONS[dest].fromMaWan);
             renderColumn('contentRight', SCHEDULE, dest, 'toMaWan', DESTINATIONS[dest].toMaWan);
             
