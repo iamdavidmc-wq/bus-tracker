@@ -153,12 +153,11 @@
             padding: 6px 12px;
             background: white;
             border-radius: 8px;
-            margin-bottom: 8px;
+            margin: 0 16px 12px;
             font-size: 12px;
             color: var(--accent);
             font-weight: 600;
             box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-            border-left: 3px solid var(--accent);
         }
 
         .route-card {
@@ -849,13 +848,13 @@
         <button class="tab" onclick="setDestination('tsingYi')">青衣 Tsing Yi</button>
     </div>
 
+    <div class="day-type" id="dayType"></div>
+
     <div class="columns">
         <div class="column">
-            <div class="day-type" id="dayTypeLeft"></div>
             <div id="contentLeft"></div>
         </div>
         <div class="column">
-            <div class="day-type" id="dayTypeRight"></div>
             <div id="contentRight"></div>
         </div>
     </div>
@@ -868,13 +867,13 @@
         const DESTINATIONS = {
             kwaiFong: {
                 name: '葵芳 Kwai Fong',
-                fromMaWan: 'Ma Wan 馬灣 → Kwai Fong 葵芳',
-                toMaWan: 'Kwai Fong 葵芳 → Ma Wan 馬灣'
+                fromTitle: 'From Ma Wan',
+                toTitle: 'From Kwai Fong'
             },
             tsingYi: {
                 name: '青衣 Tsing Yi',
-                fromMaWan: 'Ma Wan 馬灣 → Tsing Yi 青衣',
-                toMaWan: 'Tsing Yi 青衣 → Ma Wan 馬灣'
+                fromTitle: 'From Ma Wan',
+                toTitle: 'From Tsing Yi'
             }
         };
 
@@ -1218,13 +1217,11 @@
             const dest = currentDestination;
             const dayType = isWeekend() ? 'weekend' : 'weekday';
             
-            document.getElementById('dayTypeLeft').textContent = 
-                dayType === 'weekend' ? '📅 Saturday / Sunday / Public Holiday' : '📅 Monday - Friday';
-            document.getElementById('dayTypeRight').textContent = 
+            document.getElementById('dayType').textContent = 
                 dayType === 'weekend' ? '📅 Saturday / Sunday / Public Holiday' : '📅 Monday - Friday';
             
-            renderColumn('contentLeft', SCHEDULE, dest, 'fromMaWan', DESTINATIONS[dest].fromMaWan);
-            renderColumn('contentRight', SCHEDULE, dest, 'toMaWan', DESTINATIONS[dest].toMaWan);
+            renderColumn('contentLeft', SCHEDULE, dest, 'fromMaWan', DESTINATIONS[dest].fromTitle);
+            renderColumn('contentRight', SCHEDULE, dest, 'toMaWan', DESTINATIONS[dest].toTitle);
             
             document.getElementById('lastUpdated').textContent = 
                 `Updated ${new Date().toLocaleTimeString()}`;
